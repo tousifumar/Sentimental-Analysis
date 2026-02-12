@@ -1,0 +1,655 @@
+{% extends "base.html" %}
+
+{% block title %}Sentiment Trends - Sentiment Analysis{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-12">
+        <div class="d-flex justify-content-between align-items-center mb-4">
+            <h2>
+                <i class="fas fa-chart-line me-2"></i>
+                Sentiment Trends
+            </h2>
+            <div class="btn-group">
+                <button class="btn btn-outline-primary" onclick="exportTrends()">
+                    <i class="fas fa-download me-2"></i>Export Data
+                </button>
+                <button class="btn btn-outline-success" onclick="refreshCharts()">
+                    <i class="fas fa-sync me-2"></i>Refresh
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Date Range Selector -->
+<div class="card mb-4">
+    <div class="card-body">
+        <div class="row align-items-center">
+            <div class="col-md-3">
+                <label for="dateRange" class="form-label">Date Range</label>
+                <select class="form-select" id="dateRange" onchange="updateDateRange()">
+                    <option value="7">Last 7 Days</option>
+                    <option value="30" selected>Last 30 Days</option>
+                    <option value="90">Last 3 Months</option>
+                    <option value="180">Last 6 Months</option>
+                    <option value="365">Last Year</option>
+                    <option value="custom">Custom Range</option>
+                </select>
+            </div>
+            <div class="col-md-6" id="customDateContainer" style="display: none;">
+                <div class="row">
+                    <div class="col-md-6">
+                        <label for="startDate" class="form-label">Start Date</label>
+                        <input type="date" class="form-control" id="startDate">
+                    </div>
+                    <div class="col-md-6">
+                        <label for="endDate" class="form-label">End Date</label>
+                        <input type="date" class="form-control" id="endDate">
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <label for="groupBy" class="form-label">Group By</label>
+                <select class="form-select" id="groupBy" onchange="updateCharts()">
+                    <option value="day">Day</option>
+                    <option value="week">Week</option>
+                    <option value="month">Month</option>
+                </select>
+            </div>
+        </div>
+    </div>
+</div>
+
+{% if analyses %}
+<!-- Main Charts -->
+<div class="row">
+    <div class="col-lg-8">
+        <!-- Sentiment Over Time -->
+        <div class="card mb-4">
+            <div class="card-header">
+                <h5 class="mb-0">
+                    <i class="fas fa-chart-line me-2"></i>Sentiment Trends Over Time
+                </h5>
+            </div>
+            <div class="card-body">
+                <canvas id="sentimentTrendChart" height="300"></canvas>
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-lg-4">
+        <!-- Sentiment Distribution -->
+        <div class="card mb-4">
+            <div class="card-header">
+                <h5 class="mb-0">
+                    <i class="fas fa-chart-pie me-2"></i>Sentiment Distribution
+                </h5>
+            </div>
+            <div class="card-body">
+                <canvas id="sentimentDistributionChart" height="300"></canvas>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Emotion Trends -->
+<div class="card mb-4">
+    <div class="card-header">
+        <h5 class="mb-0">
+            <i class="fas fa-heart me-2"></i>Emotion Trends
+        </h5>
+    </div>
+    <div class="card-body">
+        <canvas id="emotionTrendChart" height="250"></canvas>
+    </div>
+</div>
+
+<!-- Analysis Type Distribution -->
+<div class="row">
+    <div class="col-md-6">
+        <div class="card mb-4">
+            <div class="card-header">
+                <h5 class="mb-0">
+                    <i class="fas fa-tags me-2"></i>Analysis Types
+                </h5>
+            </div>
+            <div class="card-body">
+                <canvas id="analysisTypeChart" height="250"></canvas>
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-md-6">
+        <div class="card mb-4">
+            <div class="card-header">
+                <h5 class="mb-0">
+                    <i class="fas fa-bullseye me-2"></i>Confidence Score Trends
+                </h5>
+            </div>
+            <div class="card-body">
+                <canvas id="confidenceChart" height="250"></canvas>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Key Insights -->
+<div class="card mb-4">
+    <div class="card-header">
+        <h5 class="mb-0">
+            <i class="fas fa-lightbulb me-2"></i>Key Insights
+        </h5>
+    </div>
+    <div class="card-body">
+        <div class="row">
+            <div class="col-md-4">
+                <div class="insight-card">
+                    <h6><i class="fas fa-arrow-trend-up text-success me-2"></i>Positive Trend</h6>
+                    <p class="text-muted">Your positive sentiment has <strong class="text-success">increased by 12%</strong> over the selected period.</p>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="insight-card">
+                    <h6><i class="fas fa-heart text-danger me-2"></i>Dominant Emotion</h6>
+                    <p class="text-muted">The most common emotion in your analyses is <strong class="text-primary">Joy (42%)</strong>.</p>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="insight-card">
+                    <h6><i class="fas fa-calendar-check text-info me-2"></i>Best Day</h6>
+                    <p class="text-muted">Your most positive day was <strong class="text-info">Tuesday, May 24</strong> with 85% positive sentiment.</p>
+                </div>
+            </div>
+        </div>
+        
+        <div class="row mt-3">
+            <div class="col-md-4">
+                <div class="insight-card">
+                    <h6><i class="fas fa-bullseye text-warning me-2"></i>Average Confidence</h6>
+                    <p class="text-muted">Your average confidence score is <strong class="text-warning">78%</strong>, which is above average.</p>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="insight-card">
+                    <h6><i class="fas fa-arrow-trend-down text-danger me-2"></i>Negative Trend</h6>
+                    <p class="text-muted">Your negative sentiment has <strong class="text-danger">decreased by 8%</strong> over the selected period.</p>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="insight-card">
+                    <h6><i class="fas fa-star text-success me-2"></i>Improvement</h6>
+                    <p class="text-muted">Your overall sentiment score has <strong class="text-success">improved by 15%</strong> since last month.</p>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Common Keywords -->
+<div class="card mb-4">
+    <div class="card-header">
+        <h5 class="mb-0">
+            <i class="fas fa-key me-2"></i>Common Keywords
+        </h5>
+    </div>
+    <div class="card-body">
+        <div id="keywordCloud" style="height: 300px;"></div>
+    </div>
+</div>
+
+{% else %}
+<!-- Empty State -->
+<div class="text-center py-5">
+    <i class="fas fa-chart-line fa-4x text-muted mb-4"></i>
+    <h3>No trend data available</h3>
+    <p class="text-muted mb-4">Start by analyzing texts to generate trend data!</p>
+    <div class="btn-group" role="group">
+        <a href="{{ url_for('analyze_text') }}" class="btn btn-primary">
+            <i class="fas fa-brain me-2"></i>Analyze Text
+        </a>
+        <a href="{{ url_for('batch_analyze') }}" class="btn btn-success">
+            <i class="fas fa-layer-group me-2"></i>Batch Analysis
+        </a>
+    </div>
+</div>
+{% endif %}
+{% endblock %}
+
+{% block scripts %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    {% if analyses %}
+    initCharts();
+    {% endif %}
+    
+    // Set up date range picker
+    document.getElementById('dateRange').addEventListener('change', function() {
+        const customDateContainer = document.getElementById('customDateContainer');
+        if (this.value === 'custom') {
+            customDateContainer.style.display = 'block';
+        } else {
+            customDateContainer.style.display = 'none';
+        }
+    });
+});
+
+function updateDateRange() {
+    const dateRange = document.getElementById('dateRange').value;
+    if (dateRange !== 'custom') {
+        const days = parseInt(dateRange);
+        const endDate = new Date();
+        const startDate = new Date();
+        startDate.setDate(endDate.getDate() - days);
+        
+        document.getElementById('startDate').value = formatDate(startDate);
+        document.getElementById('endDate').value = formatDate(endDate);
+    }
+    
+    updateCharts();
+}
+
+function formatDate(date) {
+    const year = date.getFullYear();
+    const month = String(date.getMonth() + 1).padStart(2, '0');
+    const day = String(date.getDate()).padStart(2, '0');
+    return `${year}-${month}-${day}`;
+}
+
+function initCharts() {
+    // Sample data - in a real app, this would come from the backend
+    const dates = generateDates(30);
+    const positiveData = generateRandomData(30, 30, 70);
+    const negativeData = generateRandomData(30, 10, 40);
+    const neutralData = generateRandomData(30, 10, 30);
+    
+    // Sentiment Trend Chart
+    const trendCtx = document.getElementById('sentimentTrendChart').getContext('2d');
+    new Chart(trendCtx, {
+        type: 'line',
+        data: {
+            labels: dates,
+            datasets: [
+                {
+                    label: 'Positive',
+                    data: positiveData,
+                    borderColor: '#28a745',
+                    backgroundColor: 'rgba(40, 167, 69, 0.1)',
+                    tension: 0.4,
+                    fill: true
+                },
+                {
+                    label: 'Negative',
+                    data: negativeData,
+                    borderColor: '#dc3545',
+                    backgroundColor: 'rgba(220, 53, 69, 0.1)',
+                    tension: 0.4,
+                    fill: true
+                },
+                {
+                    label: 'Neutral',
+                    data: neutralData,
+                    borderColor: '#6c757d',
+                    backgroundColor: 'rgba(108, 117, 125, 0.1)',
+                    tension: 0.4,
+                    fill: true
+                }
+            ]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            scales: {
+                y: {
+                    beginAtZero: true,
+                    title: {
+                        display: true,
+                        text: 'Number of Analyses'
+                    }
+                },
+                x: {
+                    title: {
+                        display: true,
+                        text: 'Date'
+                    }
+                }
+            },
+            plugins: {
+                tooltip: {
+                    mode: 'index',
+                    intersect: false
+                },
+                legend: {
+                    position: 'top'
+                }
+            }
+        }
+    });
+    
+    // Sentiment Distribution Chart
+    const distributionCtx = document.getElementById('sentimentDistributionChart').getContext('2d');
+    new Chart(distributionCtx, {
+        type: 'doughnut',
+        data: {
+            labels: ['Positive', 'Negative', 'Neutral'],
+            datasets: [{
+                data: [
+                    positiveData.reduce((a, b) => a + b, 0),
+                    negativeData.reduce((a, b) => a + b, 0),
+                    neutralData.reduce((a, b) => a + b, 0)
+                ],
+                backgroundColor: ['#28a745', '#dc3545', '#6c757d'],
+                borderWidth: 2,
+                borderColor: '#fff'
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+                legend: {
+                    position: 'bottom'
+                }
+            }
+        }
+    });
+    
+    // Emotion Trend Chart
+    const emotionCtx = document.getElementById('emotionTrendChart').getContext('2d');
+    new Chart(emotionCtx, {
+        type: 'radar',
+        data: {
+            labels: ['Joy', 'Anger', 'Sadness', 'Fear', 'Surprise', 'Disgust', 'Trust', 'Anticipation'],
+            datasets: [
+                {
+                    label: 'Last Week',
+                    data: [65, 25, 30, 20, 40, 15, 55, 45],
+                    backgroundColor: 'rgba(54, 162, 235, 0.2)',
+                    borderColor: 'rgba(54, 162, 235, 1)',
+                    pointBackgroundColor: 'rgba(54, 162, 235, 1)',
+                    pointBorderColor: '#fff',
+                    pointHoverBackgroundColor: '#fff',
+                    pointHoverBorderColor: 'rgba(54, 162, 235, 1)'
+                },
+                {
+                    label: 'Current Week',
+                    data: [70, 20, 25, 15, 45, 10, 60, 50],
+                    backgroundColor: 'rgba(255, 99, 132, 0.2)',
+                    borderColor: 'rgba(255, 99, 132, 1)',
+                    pointBackgroundColor: 'rgba(255, 99, 132, 1)',
+                    pointBorderColor: '#fff',
+                    pointHoverBackgroundColor: '#fff',
+                    pointHoverBorderColor: 'rgba(255, 99, 132, 1)'
+                }
+            ]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            scales: {
+                r: {
+                    beginAtZero: true,
+                    max: 100
+                }
+            }
+        }
+    });
+    
+    // Analysis Type Chart
+    const typeCtx = document.getElementById('analysisTypeChart').getContext('2d');
+    new Chart(typeCtx, {
+        type: 'bar',
+        data: {
+            labels: ['Basic', 'Detailed', 'Psychological', 'Social', 'Customer'],
+            datasets: [{
+                label: 'Analysis Types',
+                data: [45, 30, 15, 25, 20],
+                backgroundColor: [
+                    'rgba(54, 162, 235, 0.7)',
+                    'rgba(255, 99, 132, 0.7)',
+                    'rgba(255, 206, 86, 0.7)',
+                    'rgba(75, 192, 192, 0.7)',
+                    'rgba(153, 102, 255, 0.7)'
+                ],
+                borderColor: [
+                    'rgba(54, 162, 235, 1)',
+                    'rgba(255, 99, 132, 1)',
+                    'rgba(255, 206, 86, 1)',
+                    'rgba(75, 192, 192, 1)',
+                    'rgba(153, 102, 255, 1)'
+                ],
+                borderWidth: 1
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            scales: {
+                y: {
+                    beginAtZero: true,
+                    title: {
+                        display: true,
+                        text: 'Number of Analyses'
+                    }
+                }
+            },
+            plugins: {
+                legend: {
+                    display: false
+                }
+            }
+        }
+    });
+    
+    // Confidence Score Chart
+    const confidenceCtx = document.getElementById('confidenceChart').getContext('2d');
+    new Chart(confidenceCtx, {
+        type: 'line',
+        data: {
+            labels: dates.slice(-10),
+            datasets: [{
+                label: 'Average Confidence Score',
+                data: generateRandomData(10, 60, 95),
+                borderColor: 'rgba(153, 102, 255, 1)',
+                backgroundColor: 'rgba(153, 102, 255, 0.1)',
+                tension: 0.4,
+                fill: true
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            scales: {
+                y: {
+                    beginAtZero: true,
+                    max: 100,
+                    title: {
+                        display: true,
+                        text: 'Confidence Score (%)'
+                    }
+                }
+            }
+        }
+    });
+    
+    // Simulate a keyword cloud with a simple visualization
+    const keywordCloud = document.getElementById('keywordCloud');
+    const keywords = [
+        { text: 'excellent', size: 40 },
+        { text: 'good', size: 35 },
+        { text: 'great', size: 30 },
+        { text: 'disappointed', size: 25 },
+        { text: 'amazing', size: 35 },
+        { text: 'terrible', size: 20 },
+        { text: 'awesome', size: 30 },
+        { text: 'bad', size: 25 },
+        { text: 'love', size: 40 },
+        { text: 'hate', size: 20 },
+        { text: 'satisfied', size: 30 },
+        { text: 'unhappy', size: 25 },
+        { text: 'recommend', size: 35 },
+        { text: 'avoid', size: 20 },
+        { text: 'quality', size: 30 },
+        { text: 'service', size: 35 },
+        { text: 'price', size: 30 },
+        { text: 'value', size: 25 },
+        { text: 'experience', size: 35 },
+        { text: 'customer', size: 30 }
+    ];
+    
+    let cloudHtml = '';
+    keywords.forEach(keyword => {
+        const fontSize = keyword.size / 10;
+        const color = getKeywordColor(keyword.text);
+        cloudHtml += `<span style="font-size: ${fontSize}rem; color: ${color}; margin: 0.5rem; display: inline-block;">${keyword.text}</span>`;
+    });
+    
+    keywordCloud.innerHTML = cloudHtml;
+}
+
+function getKeywordColor(keyword) {
+    // Simple logic to assign colors based on positive/negative connotations
+    const positiveWords = ['excellent', 'good', 'great', 'amazing', 'awesome', 'love', 'satisfied', 'recommend', 'quality'];
+    const negativeWords = ['disappointed', 'terrible', 'bad', 'hate', 'unhappy', 'avoid'];
+    
+    if (positiveWords.includes(keyword.toLowerCase())) {
+        return '#28a745';  // green
+    } else if (negativeWords.includes(keyword.toLowerCase())) {
+        return '#dc3545';  // red
+    } else {
+        return '#6c757d';  // gray
+    }
+}
+
+function generateDates(days) {
+    const dates = [];
+    const today = new Date();
+    
+    for (let i = days - 1; i >= 0; i--) {
+        const date = new Date();
+        date.setDate(today.getDate() - i);
+        dates.push(date.toLocaleDateString('en-US', { month: 'short', day: 'numeric' }));
+    }
+    
+    return dates;
+}
+
+function generateRandomData(count, min, max) {
+    return Array.from({ length: count }, () => Math.floor(Math.random() * (max - min + 1)) + min);
+}
+
+function updateCharts() {
+    // In a real app, this would fetch new data based on the selected date range and grouping
+    const dateRange = document.getElementById('dateRange').value;
+    const groupBy = document.getElementById('groupBy').value;
+    
+    // Show loading state
+    const alert = document.createElement('div');
+    alert.className = 'alert alert-info alert-dismissible fade show';
+    alert.innerHTML = `
+        <i class="fas fa-spinner fa-spin me-2"></i>
+        Updating charts with new date range...
+        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+    `;
+    document.querySelector('.container').insertBefore(alert, document.querySelector('.row'));
+    
+    // Simulate loading
+    setTimeout(() => {
+        if (alert.parentNode) {
+            alert.innerHTML = `
+                <i class="fas fa-check me-2"></i>
+                Charts updated successfully!
+                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+            `;
+            alert.className = 'alert alert-success alert-dismissible fade show';
+        }
+        
+        // Auto-dismiss after 3 seconds
+        setTimeout(() => {
+            if (alert.parentNode) {
+                alert.remove();
+            }
+        }, 3000);
+    }, 1500);
+    
+    // In a real app, we would update the charts with new data here
+}
+
+function refreshCharts() {
+    // Show loading state
+    const alert = document.createElement('div');
+    alert.className = 'alert alert-info alert-dismissible fade show';
+    alert.innerHTML = `
+        <i class="fas fa-spinner fa-spin me-2"></i>
+        Refreshing charts...
+        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+    `;
+    document.querySelector('.container').insertBefore(alert, document.querySelector('.row'));
+    
+    // Simulate loading
+    setTimeout(() => {
+        if (alert.parentNode) {
+            alert.innerHTML = `
+                <i class="fas fa-check me-2"></i>
+                Charts refreshed with latest data!
+                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+            `;
+            alert.className = 'alert alert-success alert-dismissible fade show';
+        }
+        
+        // Auto-dismiss after 3 seconds
+        setTimeout(() => {
+            if (alert.parentNode) {
+                alert.remove();
+            }
+        }, 3000);
+    }, 1500);
+    
+    // In a real app, we would refresh the charts with new data here
+}
+
+function exportTrends() {
+    // Show loading state
+    const alert = document.createElement('div');
+    alert.className = 'alert alert-info alert-dismissible fade show';
+    alert.innerHTML = `
+        <i class="fas fa-spinner fa-spin me-2"></i>
+        Exporting trend data...
+        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+    `;
+    document.querySelector('.container').insertBefore(alert, document.querySelector('.row'));
+    
+    // Simulate export process
+    setTimeout(() => {
+        if (alert.parentNode) {
+            alert.innerHTML = `
+                <i class="fas fa-check me-2"></i>
+                Trend data exported successfully!
+                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+            `;
+            alert.className = 'alert alert-success alert-dismissible fade show';
+        }
+        
+        // Create and trigger download
+        const link = document.createElement('a');
+        link.href = 'data:text/json;charset=utf-8,' + encodeURIComponent(JSON.stringify({
+            exported_at: new Date().toISOString(),
+            date_range: document.getElementById('dateRange').value,
+            group_by: document.getElementById('groupBy').value,
+            trends: 'Sample trend data'
+        }));
+        link.download = 'sentiment_trends.json';
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+        
+        // Auto-dismiss after 3 seconds
+        setTimeout(() => {
+            if (alert.parentNode) {
+                alert.remove();
+            }
+        }, 3000);
+    }, 1500);
+}
+</script>
+{% endblock %}

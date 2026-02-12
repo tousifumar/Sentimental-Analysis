@@ -1,0 +1,212 @@
+{% extends "base.html" %}
+
+{% block title %}Dashboard - Sentiment Analysis{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-12">
+        <h2 class="mb-4">
+            <i class="fas fa-tachometer-alt me-2"></i>
+            Welcome back, {{ session.user_name }}!
+        </h2>
+    </div>
+</div>
+
+<!-- Statistics Cards -->
+<div class="row g-4 mb-4">
+    <div class="col-md-3">
+        <div class="card sentiment-positive">
+            <div class="card-body text-center">
+                <i class="fas fa-smile fa-2x mb-2"></i>
+                <h4>{{ sentiment_counts.get('positive', 0) }}</h4>
+                <p class="mb-0">Positive</p>
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-md-3">
+        <div class="card sentiment-negative">
+            <div class="card-body text-center">
+                <i class="fas fa-frown fa-2x mb-2"></i>
+                <h4>{{ sentiment_counts.get('negative', 0) }}</h4>
+                <p class="mb-0">Negative</p>
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-md-3">
+        <div class="card sentiment-neutral">
+            <div class="card-body text-center">
+                <i class="fas fa-meh fa-2x mb-2"></i>
+                <h4>{{ sentiment_counts.get('neutral', 0) }}</h4>
+                <p class="mb-0">Neutral</p>
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-md-3">
+        <div class="card bg-primary text-white">
+            <div class="card-body text-center">
+                <i class="fas fa-chart-bar fa-2x mb-2"></i>
+                <h4>{{ analyses|length }}</h4>
+                <p class="mb-0">Total Analyses</p>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row">
+    <div class="col-lg-8">
+        <!-- Recent Analyses -->
+        <div class="card">
+            <div class="card-header">
+                <h5 class="mb-0">
+                    <i class="fas fa-history me-2"></i>Recent Analyses
+                </h5>
+            </div>
+            <div class="card-body">
+                {% if analyses %}
+                    {% for analysis in analyses %}
+                    <div class="analysis-card">
+                        <div class="d-flex justify-content-between align-items-start mb-2">
+                            <div class="flex-grow-1">
+                                <p class="mb-1">{{ analysis.text_content[:100] }}{% if analysis.text_content|length > 100 %}...{% endif %}</p>
+                                <div class="d-flex align-items-center">
+                                    <span class="badge sentiment-{{ analysis.sentiment }} me-2">
+                                        {{ analysis.sentiment|title }}
+                                    </span>
+                                    <span class="badge bg-secondary me-2">{{ analysis.analysis_type|title }}</span>
+                                    <small class="text-muted">{{ (analysis.confidence_score * 100)|round }}% confidence</small>
+                                </div>
+                            </div>
+                            <div class="text-end">
+                                <small class="text-muted d-block">{{ analysis.created_at.strftime('%b %d, %Y') }}</small>
+                                <small class="text-muted d-block">{{ analysis.created_at.strftime('%I:%M %p') }}</small>
+                                <a href="{{ url_for('view_analysis', analysis_id=analysis.id) }}" class="btn btn-sm btn-outline-primary mt-1">
+                                    View Details
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                    {% endfor %}
+                    <div class="mt-3">
+                        <a href="{{ url_for('analysis_history') }}" class="btn btn-outline-primary">
+                            View All Analyses
+                        </a>
+                    </div>
+                {% else %}
+                    <div class="text-center py-4">
+                        <i class="fas fa-brain fa-3x text-muted mb-3"></i>
+                        <h5>No analyses yet</h5>
+                        <p class="text-muted">Start by analyzing your first text!</p>
+                        <a href="{{ url_for('analyze_text') }}" class="btn btn-primary">
+                            Analyze Text
+                        </a>
+                    </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-lg-4">
+        <!-- Quick Actions -->
+        <div class="card">
+            <div class="card-header">
+                <h6 class="mb-0">
+                    <i class="fas fa-bolt me-2"></i>Quick Actions
+                </h6>
+            </div>
+            <div class="card-body">
+                <div class="d-grid gap-2">
+                    <a href="{{ url_for('analyze_text') }}" class="btn btn-primary">
+                        <i class="fas fa-brain me-2"></i>Analyze Text
+                    </a>
+                    
+                    <a href="{{ url_for('sentiment_trends') }}" class="btn btn-info">
+                        <i class="fas fa-chart-line me-2"></i>View Trends
+                    </a>
+                    <a href="{{ url_for('analysis_history') }}" class="btn btn-outline-secondary">
+                        <i class="fas fa-history me-2"></i>Analysis History
+                    </a>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Sentiment Distribution Chart -->
+        {% if sentiment_counts %}
+        <div class="card mt-4">
+            <div class="card-header">
+                <h6 class="mb-0">
+                    <i class="fas fa-chart-pie me-2"></i>Sentiment Distribution
+                </h6>
+            </div>
+            <div class="card-body">
+                <canvas id="sentimentChart" width="300" height="300"></canvas>
+            </div>
+        </div>
+        {% endif %}
+        
+        <!-- Analysis Tips -->
+        <div class="card mt-4">
+            <div class="card-header">
+                <h6 class="mb-0">
+                    <i class="fas fa-lightbulb me-2"></i>Analysis Tips
+                </h6>
+            </div>
+            <div class="card-body">
+                <ul class="list-unstyled">
+                    <li class="mb-2">
+                        <i class="fas fa-check text-success me-2"></i>
+                        Use detailed analysis for comprehensive insights
+                    </li>
+                    
+                    <li class="mb-2">
+                        <i class="fas fa-check text-success me-2"></i>
+                        Monitor trends over time
+                    </li>
+                    <li class="mb-2">
+                        <i class="fas fa-check text-success me-2"></i>
+                        Export results for reporting
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+{% if sentiment_counts %}
+// Sentiment Distribution Chart
+const ctx = document.getElementById('sentimentChart').getContext('2d');
+const sentimentData = {{ sentiment_counts|tojson }};
+
+new Chart(ctx, {
+    type: 'doughnut',
+    data: {
+        labels: ['Positive', 'Negative', 'Neutral'],
+        datasets: [{
+            data: [
+                sentimentData.positive || 0,
+                sentimentData.negative || 0,
+                sentimentData.neutral || 0
+            ],
+            backgroundColor: ['#28a745', '#dc3545', '#6c757d'],
+            borderWidth: 2,
+            borderColor: '#fff'
+        }]
+    },
+    options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        plugins: {
+            legend: {
+                position: 'bottom'
+            }
+        }
+    }
+});
+{% endif %}
+</script>
+{% endblock %}

@@ -1,0 +1,131 @@
+{% extends "base.html" %}
+
+{% block title %}Login - Sentiment Analysis{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-md-6 col-lg-4">
+        <div class="card">
+            <div class="card-body p-4">
+                <div class="text-center mb-4">
+                    <i class="fas fa-brain fa-3x text-primary mb-3"></i>
+                    <h3>Welcome Back</h3>
+                    <p class="text-muted">Sign in to your sentiment analysis account</p>
+                </div>
+                
+                <form method="POST">
+                    <div class="mb-3">
+                        <label for="email" class="form-label">Email Address</label>
+                        <div class="input-group">
+                            <span class="input-group-text">
+                                <i class="fas fa-envelope"></i>
+                            </span>
+                            <input type="email" class="form-control" id="email" name="email" 
+                                   placeholder="Enter your email" required>
+                        </div>
+                    </div>
+                    
+                    <div class="d-grid">
+                        <button type="submit" class="btn btn-primary btn-lg">
+                            <i class="fas fa-sign-in-alt me-2"></i>Sign In
+                        </button>
+                    </div>
+                </form>
+                
+                <hr class="my-4">
+                
+                <div class="text-center">
+                    <p class="mb-2">Don't have an account?</p>
+                    <a href="{{ url_for('register') }}" class="btn btn-outline-primary">
+                        <i class="fas fa-user-plus me-2"></i>Create Account
+                    </a>
+                </div>
+                
+                <div class="text-center mt-3">
+                    <small class="text-muted">
+                        <i class="fas fa-info-circle me-1"></i>
+                        No password required - just enter your email!
+                    </small>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Demo Account -->
+        <div class="card mt-4">
+            <div class="card-header bg-info text-white">
+                <h6 class="mb-0">
+                    <i class="fas fa-play me-2"></i>Try Demo Account
+                </h6>
+            </div>
+            <div class="card-body">
+                <p class="mb-3">Use this demo account to explore the features:</p>
+                <button class="btn btn-info btn-sm w-100" onclick="fillDemoAccount()">
+                    <i class="fas fa-user me-2"></i>Use Demo Account
+                </button>
+            </div>
+        </div>
+        
+        <!-- Features Preview -->
+        <div class="card mt-4">
+            <div class="card-header">
+                <h6 class="mb-0">
+                    <i class="fas fa-star me-2"></i>What You Get
+                </h6>
+            </div>
+            <div class="card-body">
+                <ul class="list-unstyled">
+                    <li class="mb-2">
+                        <i class="fas fa-check text-success me-2"></i>
+                        Advanced sentiment analysis
+                    </li>
+                    <li class="mb-2">
+                        <i class="fas fa-check text-success me-2"></i>
+                        Emotion detection & insights
+                    </li>
+                    <li class="mb-2">
+                        <i class="fas fa-check text-success me-2"></i>
+                        Psychological profiling
+                    </li>
+                    <li class="mb-2">
+                        <i class="fas fa-check text-success me-2"></i>
+                        Batch analysis & trends
+                    </li>
+                    <li class="mb-2">
+                        <i class="fas fa-check text-success me-2"></i>
+                        Analysis history & export
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+function fillDemoAccount() {
+    document.getElementById('email').value = 'demo@sentimentanalysis.com';
+    
+    // Show success message
+    const alert = document.createElement('div');
+    alert.className = 'alert alert-info alert-dismissible fade show mt-3';
+    alert.innerHTML = `
+        Demo account filled! Click "Sign In" to continue.
+        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+    `;
+    document.querySelector('.card-body').appendChild(alert);
+    
+    // Auto-dismiss after 3 seconds
+    setTimeout(() => {
+        if (alert.parentNode) {
+            alert.remove();
+        }
+    }, 3000);
+}
+
+// Auto-focus email field
+document.addEventListener('DOMContentLoaded', function() {
+    document.getElementById('email').focus();
+});
+</script>
+{% endblock %}

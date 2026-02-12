@@ -1,0 +1,194 @@
+{% extends "base.html" %}
+
+{% block title %}Batch Analysis - Sentiment Analysis{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-lg-8">
+        <div class="card">
+            <div class="card-header bg-success text-white">
+                <h4 class="mb-0">
+                    <i class="fas fa-layer-group me-2"></i>Batch Sentiment Analysis
+                </h4>
+            </div>
+            <div class="card-body">
+                <form method="POST">
+                    <div class="mb-3">
+                        <label for="batch_name" class="form-label">Batch Name</label>
+                        <input type="text" class="form-control" id="batch_name" name="batch_name" 
+                               placeholder="e.g., Customer Reviews Q1 2024, Social Media Posts..." required>
+                        <div class="form-text">Give this batch analysis a descriptive name</div>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label for="texts_input" class="form-label">Texts to Analyze</label>
+                        <textarea class="form-control" id="texts_input" name="texts_input" rows="12" 
+                                placeholder="Enter multiple texts, one per line:
+
+Example:
+I love this product! It's amazing.
+The service was terrible and slow.
+Average experience, nothing special.
+Fantastic customer support team!
+..." required></textarea>
+                        <div class="form-text">Enter each text on a separate line. Maximum 50 texts per batch.</div>
+                    </div>
+                    
+                    <div class="d-grid">
+                        <button type="submit" class="btn btn-success btn-lg">
+                            <i class="fas fa-brain me-2"></i>Analyze Batch with AI
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+        
+        <!-- Batch Analysis Features -->
+        <div class="card mt-4">
+            <div class="card-header">
+                <h6 class="mb-0">
+                    <i class="fas fa-star me-2"></i>Batch Analysis Features
+                </h6>
+            </div>
+            <div class="card-body">
+                <div class="row">
+                    <div class="col-md-6">
+                        <ul class="list-unstyled">
+                            <li class="mb-2">
+                                <i class="fas fa-check text-success me-2"></i>
+                                Aggregate sentiment distribution
+                            </li>
+                            <li class="mb-2">
+                                <i class="fas fa-check text-success me-2"></i>
+                                Common themes identification
+                            </li>
+                            <li class="mb-2">
+                                <i class="fas fa-check text-success me-2"></i>
+                                Trend analysis across texts
+                            </li>
+                        </ul>
+                    </div>
+                    <div class="col-md-6">
+                        <ul class="list-unstyled">
+                            <li class="mb-2">
+                                <i class="fas fa-check text-success me-2"></i>
+                                Individual text analysis
+                            </li>
+                            <li class="mb-2">
+                                <i class="fas fa-check text-success me-2"></i>
+                                Dominant emotion patterns
+                            </li>
+                            <li class="mb-2">
+                                <i class="fas fa-check text-success me-2"></i>
+                                Actionable insights
+                            </li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Sample Data -->
+        <div class="card mt-4">
+            <div class="card-header">
+                <h6 class="mb-0">
+                    <i class="fas fa-lightbulb me-2"></i>Sample Data Sets
+                </h6>
+            </div>
+            <div class="card-body">
+                <div class="row g-2">
+                    <div class="col-md-6">
+                        <button class="btn btn-outline-primary btn-sm w-100" onclick="fillSampleData('reviews')">
+                            Customer Reviews
+                        </button>
+                    </div>
+                    <div class="col-md-6">
+                        <button class="btn btn-outline-success btn-sm w-100" onclick="fillSampleData('social')">
+                            Social Media Posts
+                        </button>
+                    </div>
+                    <div class="col-md-6">
+                        <button class="btn btn-outline-info btn-sm w-100" onclick="fillSampleData('feedback')">
+                            Employee Feedback
+                        </button>
+                    </div>
+                    <div class="col-md-6">
+                        <button class="btn btn-outline-warning btn-sm w-100" onclick="fillSampleData('surveys')">
+                            Survey Responses
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+function fillSampleData(type) {
+    const textarea = document.getElementById('texts_input');
+    const batchName = document.getElementById('batch_name');
+    
+    const samples = {
+        'reviews': {
+            name: 'Customer Product Reviews',
+            texts: `This product exceeded my expectations! Great quality and fast shipping.
+The item arrived damaged and customer service was unhelpful.
+Average product, nothing special but does the job.
+Absolutely love it! Will definitely buy again.
+Overpriced for what you get. Not worth the money.
+Excellent quality and beautiful design. Highly recommend!
+Product broke after one week of use. Very disappointed.
+Good value for money. Satisfied with the purchase.
+Amazing customer service and quick resolution of issues.
+The product description was misleading. Not as advertised.`
+        },
+        'social': {
+            name: 'Social Media Brand Mentions',
+            texts: `Just tried @BrandName's new product and I'm obsessed! 😍 #amazing
+Worst customer service ever from @BrandName. Never again! 😡
+@BrandName has the best deals! Just saved so much money 💰
+Meh, @BrandName is okay I guess. Nothing to write home about.
+@BrandName's new campaign is so inspiring! Love the message ❤️
+Why is @BrandName so expensive? There are better alternatives.
+Shoutout to @BrandName for the quick delivery! Super impressed 🚀
+@BrandName needs to step up their game. Competition is better.
+Been a loyal @BrandName customer for years. Never disappoints!
+@BrandName's website is so confusing. Couldn't find anything.`
+        },
+        'feedback': {
+            name: 'Employee Satisfaction Survey',
+            texts: `I love working here! Great team and supportive management.
+The workload is overwhelming and deadlines are unrealistic.
+Good work-life balance and flexible schedule options.
+Management needs better communication with the team.
+Excellent learning opportunities and career development.
+The office environment is toxic and stressful.
+Fair compensation and good benefits package.
+Lack of recognition for hard work and achievements.
+Collaborative team culture and helpful colleagues.
+Limited growth opportunities and unclear career path.`
+        },
+        'surveys': {
+            name: 'Product Satisfaction Survey',
+            texts: `Very satisfied with the product quality and performance.
+Somewhat dissatisfied with the delivery time and packaging.
+Extremely happy with the customer support experience.
+The product didn't meet my expectations at all.
+Good value for money and would recommend to others.
+Neutral feelings about the product. It's just okay.
+Outstanding quality and exceeded all expectations.
+Poor build quality and broke within a month.
+Great design and user-friendly interface.
+Confusing instructions and difficult to set up.`
+        }
+    };
+    
+    if (samples[type]) {
+        textarea.value = samples[type].texts;
+        batchName.value = samples[type].name;
+    }
+}
+</script>
+{% endblock %}

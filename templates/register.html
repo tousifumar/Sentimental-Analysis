@@ -1,0 +1,378 @@
+{% extends "base.html" %}
+
+{% block title %}Register - Sentiment Analysis{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-md-8 col-lg-6">
+        <div class="card">
+            <div class="card-body p-4">
+                <div class="text-center mb-4">
+                    <i class="fas fa-user-plus fa-3x text-success mb-3"></i>
+                    <h3>Create Your Account</h3>
+                    <p class="text-muted">Join thousands of users analyzing sentiment with AI</p>
+                </div>
+                
+                <form method="POST" id="registerForm">
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label for="name" class="form-label">Full Name</label>
+                                <div class="input-group">
+                                    <span class="input-group-text">
+                                        <i class="fas fa-user"></i>
+                                    </span>
+                                    <input type="text" class="form-control" id="name" name="name" 
+                                           placeholder="Enter your full name" required>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label for="email" class="form-label">Email Address</label>
+                                <div class="input-group">
+                                    <span class="input-group-text">
+                                        <i class="fas fa-envelope"></i>
+                                    </span>
+                                    <input type="email" class="form-control" id="email" name="email" 
+                                           placeholder="Enter your email" required>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <div class="form-check">
+                            <input class="form-check-input" type="checkbox" id="terms" required>
+                            <label class="form-check-label" for="terms">
+                                I agree to the <a href="#" data-bs-toggle="modal" data-bs-target="#termsModal">Terms of Service</a> 
+                                and <a href="#" data-bs-toggle="modal" data-bs-target="#privacyModal">Privacy Policy</a>
+                            </label>
+                        </div>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <div class="form-check">
+                            <input class="form-check-input" type="checkbox" id="newsletter">
+                            <label class="form-check-label" for="newsletter">
+                                Send me updates about new features and sentiment analysis insights
+                            </label>
+                        </div>
+                    </div>
+                    
+                    <div class="d-grid">
+                        <button type="submit" class="btn btn-success btn-lg">
+                            <i class="fas fa-user-plus me-2"></i>Create Account
+                        </button>
+                    </div>
+                </form>
+                
+                <hr class="my-4">
+                
+                <div class="text-center">
+                    <p class="mb-2">Already have an account?</p>
+                    <a href="{{ url_for('login') }}" class="btn btn-outline-primary">
+                        <i class="fas fa-sign-in-alt me-2"></i>Sign In
+                    </a>
+                </div>
+                
+                <div class="text-center mt-3">
+                    <small class="text-muted">
+                        <i class="fas fa-shield-alt me-1"></i>
+                        Your data is secure and never shared with third parties
+                    </small>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-md-4 col-lg-3">
+        <!-- Benefits -->
+        <div class="card">
+            <div class="card-header bg-success text-white">
+                <h6 class="mb-0">
+                    <i class="fas fa-gift me-2"></i>Free Account Benefits
+                </h6>
+            </div>
+            <div class="card-body">
+                <ul class="list-unstyled">
+                    <li class="mb-2">
+                        <i class="fas fa-check text-success me-2"></i>
+                        <strong>Unlimited</strong> text analysis
+                    </li>
+                    <li class="mb-2">
+                        <i class="fas fa-check text-success me-2"></i>
+                        <strong>Advanced</strong> emotion detection
+                    </li>
+                    <li class="mb-2">
+                        <i class="fas fa-check text-success me-2"></i>
+                        <strong>Psychological</strong> insights
+                    </li>
+                    <li class="mb-2">
+                        <i class="fas fa-check text-success me-2"></i>
+                        <strong>Batch</strong> processing
+                    </li>
+                    <li class="mb-2">
+                        <i class="fas fa-check text-success me-2"></i>
+                        <strong>Trend</strong> analysis
+                    </li>
+                    <li class="mb-2">
+                        <i class="fas fa-check text-success me-2"></i>
+                        <strong>Export</strong> capabilities
+                    </li>
+                    <li class="mb-2">
+                        <i class="fas fa-check text-success me-2"></i>
+                        <strong>Analysis</strong> history
+                    </li>
+                </ul>
+            </div>
+        </div>
+        
+        <!-- Use Cases -->
+        <div class="card mt-4">
+            <div class="card-header">
+                <h6 class="mb-0">
+                    <i class="fas fa-lightbulb me-2"></i>Perfect For
+                </h6>
+            </div>
+            <div class="card-body">
+                <ul class="list-unstyled">
+                    <li class="mb-2">
+                        <i class="fas fa-briefcase text-primary me-2"></i>
+                        Business analysts
+                    </li>
+                    <li class="mb-2">
+                        <i class="fas fa-chart-line text-info me-2"></i>
+                        Market researchers
+                    </li>
+                    <li class="mb-2">
+                        <i class="fas fa-users text-success me-2"></i>
+                        Social media managers
+                    </li>
+                    <li class="mb-2">
+                        <i class="fas fa-graduation-cap text-warning me-2"></i>
+                        Students & researchers
+                    </li>
+                    <li class="mb-2">
+                        <i class="fas fa-heart text-danger me-2"></i>
+                        Mental health professionals
+                    </li>
+                    <li class="mb-2">
+                        <i class="fas fa-star text-warning me-2"></i>
+                        Customer experience teams
+                    </li>
+                </ul>
+            </div>
+        </div>
+        
+        <!-- Security -->
+        <div class="card mt-4">
+            <div class="card-header bg-info text-white">
+                <h6 class="mb-0">
+                    <i class="fas fa-shield-alt me-2"></i>Security & Privacy
+                </h6>
+            </div>
+            <div class="card-body">
+                <ul class="list-unstyled">
+                    <li class="mb-2">
+                        <i class="fas fa-lock text-success me-2"></i>
+                        Encrypted data storage
+                    </li>
+                    <li class="mb-2">
+                        <i class="fas fa-user-shield text-success me-2"></i>
+                        No data sharing
+                    </li>
+                    <li class="mb-2">
+                        <i class="fas fa-trash text-success me-2"></i>
+                        Data deletion on request
+                    </li>
+                    <li class="mb-2">
+                        <i class="fas fa-eye-slash text-success me-2"></i>
+                        Anonymous analysis option
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Terms Modal -->
+<div class="modal fade" id="termsModal" tabindex="-1">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Terms of Service</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <h6>1. Acceptance of Terms</h6>
+                <p>By using our sentiment analysis service, you agree to these terms and conditions.</p>
+                
+                <h6>2. Service Description</h6>
+                <p>We provide AI-powered sentiment analysis, emotion detection, and psychological insights for text content.</p>
+                
+                <h6>3. User Responsibilities</h6>
+                <ul>
+                    <li>Provide accurate information during registration</li>
+                    <li>Use the service for lawful purposes only</li>
+                    <li>Respect intellectual property rights</li>
+                    <li>Do not attempt to reverse engineer our AI models</li>
+                </ul>
+                
+                <h6>4. Data Usage</h6>
+                <p>Your text data is processed to provide analysis results. We do not store or share your content without permission.</p>
+                
+                <h6>5. Limitations</h6>
+                <p>Our AI analysis is for informational purposes and should not replace professional psychological assessment.</p>
+                
+                <h6>6. Account Termination</h6>
+                <p>We reserve the right to terminate accounts that violate these terms.</p>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Privacy Modal -->
+<div class="modal fade" id="privacyModal" tabindex="-1">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Privacy Policy</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <h6>Information We Collect</h6>
+                <ul>
+                    <li><strong>Account Information:</strong> Name and email address</li>
+                    <li><strong>Analysis Data:</strong> Text content you submit for analysis</li>
+                    <li><strong>Usage Data:</strong> How you interact with our service</li>
+                </ul>
+                
+                <h6>How We Use Your Information</h6>
+                <ul>
+                    <li>Provide sentiment analysis services</li>
+                    <li>Improve our AI models (anonymized data only)</li>
+                    <li>Send service updates (if opted in)</li>
+                    <li>Provide customer support</li>
+                </ul>
+                
+                <h6>Data Security</h6>
+                <p>We use industry-standard encryption and security measures to protect your data.</p>
+                
+                <h6>Data Sharing</h6>
+                <p>We do not sell, rent, or share your personal information with third parties, except:</p>
+                <ul>
+                    <li>When required by law</li>
+                    <li>To protect our rights or safety</li>
+                    <li>With your explicit consent</li>
+                </ul>
+                
+                <h6>Your Rights</h6>
+                <ul>
+                    <li>Access your data</li>
+                    <li>Correct inaccurate information</li>
+                    <li>Delete your account and data</li>
+                    <li>Export your analysis history</li>
+                </ul>
+                
+                <h6>Contact Us</h6>
+                <p>For privacy concerns, contact us at privacy@sentimentanalysis.com</p>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+// Form validation
+document.getElementById('registerForm').addEventListener('submit', function(e) {
+    const name = document.getElementById('name').value.trim();
+    const email = document.getElementById('email').value.trim();
+    const terms = document.getElementById('terms').checked;
+    
+    if (!name || name.length < 2) {
+        e.preventDefault();
+        showAlert('Please enter a valid name (at least 2 characters)', 'danger');
+        return;
+    }
+    
+    if (!email || !isValidEmail(email)) {
+        e.preventDefault();
+        showAlert('Please enter a valid email address', 'danger');
+        return;
+    }
+    
+    if (!terms) {
+        e.preventDefault();
+        showAlert('Please accept the Terms of Service to continue', 'warning');
+        return;
+    }
+    
+    // Show success message
+    showAlert('Creating your account...', 'info');
+});
+
+function isValidEmail(email) {
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    return emailRegex.test(email);
+}
+
+function showAlert(message, type) {
+    const existingAlert = document.querySelector('.alert');
+    if (existingAlert) {
+        existingAlert.remove();
+    }
+    
+    const alert = document.createElement('div');
+    alert.className = `alert alert-${type} alert-dismissible fade show`;
+    alert.innerHTML = `
+        ${message}
+        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+    `;
+    
+    const form = document.getElementById('registerForm');
+    form.parentNode.insertBefore(alert, form);
+    
+    // Auto-dismiss success/info alerts
+    if (type === 'success' || type === 'info') {
+        setTimeout(() => {
+            if (alert.parentNode) {
+                alert.remove();
+            }
+        }, 3000);
+    }
+}
+
+// Auto-focus name field
+document.addEventListener('DOMContentLoaded', function() {
+    document.getElementById('name').focus();
+});
+
+// Real-time email validation
+document.getElementById('email').addEventListener('blur', function() {
+    const email = this.value.trim();
+    if (email && !isValidEmail(email)) {
+        this.classList.add('is-invalid');
+    } else {
+        this.classList.remove('is-invalid');
+    }
+});
+
+// Real-time name validation
+document.getElementById('name').addEventListener('blur', function() {
+    const name = this.value.trim();
+    if (name && name.length < 2) {
+        this.classList.add('is-invalid');
+    } else {
+        this.classList.remove('is-invalid');
+    }
+});
+</script>
+{% endblock %}

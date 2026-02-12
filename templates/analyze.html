@@ -1,0 +1,151 @@
+{% extends "base.html" %}
+
+{% block title %}Analyze Text - Sentiment Analysis{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-lg-8">
+        <div class="card">
+            <div class="card-header bg-primary text-white">
+                <h4 class="mb-0">
+                    <i class="fas fa-brain me-2"></i>Sentiment Analysis
+                </h4>
+            </div>
+            <div class="card-body">
+                <form method="POST">
+                    <div class="mb-3">
+                        <label for="text_content" class="form-label">Text to Analyze</label>
+                        <textarea class="form-control" id="text_content" name="text_content" rows="8" 
+                                placeholder="Enter the text you want to analyze for sentiment, emotions, and psychological insights..." required></textarea>
+                        <div class="form-text">Paste any text: social media posts, reviews, emails, articles, etc.</div>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label for="analysis_type" class="form-label">Analysis Type</label>
+                        <select class="form-select" id="analysis_type" name="analysis_type">
+                            <option value="basic">Basic Sentiment (Fast)</option>
+                            <option value="detailed">Detailed Emotions (Comprehensive)</option>
+                            <option value="psychological">Psychological Insights (Deep)</option>
+                            <option value="social">Social Media Analysis</option>
+                            <option value="customer">Customer Feedback Analysis</option>
+                        </select>
+                        <div class="form-text">Choose the depth of analysis you need</div>
+                    </div>
+                    
+                    <div class="d-grid">
+                        <button type="submit" class="btn btn-primary btn-lg">
+                            <i class="fas fa-brain me-2"></i>Analyze with AI
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+        
+        <!-- Analysis Type Descriptions -->
+        <div class="card mt-4">
+            <div class="card-header">
+                <h6 class="mb-0">
+                    <i class="fas fa-info-circle me-2"></i>Analysis Types Explained
+                </h6>
+            </div>
+            <div class="card-body">
+                <div class="row">
+                    <div class="col-md-6">
+                        <div class="mb-3">
+                            <h6><span class="badge bg-primary me-2">Basic</span>Sentiment Analysis</h6>
+                            <small class="text-muted">Quick positive/negative/neutral detection with confidence scores</small>
+                        </div>
+                        
+                        <div class="mb-3">
+                            <h6><span class="badge bg-success me-2">Detailed</span>Emotion Analysis</h6>
+                            <small class="text-muted">8 core emotions (joy, anger, sadness, fear, etc.) with intensity scores</small>
+                        </div>
+                        
+                        <div class="mb-3">
+                            <h6><span class="badge bg-info me-2">Psychological</span>Deep Insights</h6>
+                            <small class="text-muted">Personality traits, communication style, stress indicators</small>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="mb-3">
+                            <h6><span class="badge bg-warning me-2">Social</span>Social Media</h6>
+                            <small class="text-muted">Optimized for social posts, hashtags, informal language</small>
+                        </div>
+                        
+                        <div class="mb-3">
+                            <h6><span class="badge bg-danger me-2">Customer</span>Feedback Analysis</h6>
+                            <small class="text-muted">Business-focused analysis for reviews and customer feedback</small>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Sample Texts -->
+        <div class="card mt-4">
+            <div class="card-header">
+                <h6 class="mb-0">
+                    <i class="fas fa-lightbulb me-2"></i>Sample Texts to Try
+                </h6>
+            </div>
+            <div class="card-body">
+                <div class="row g-2">
+                    <div class="col-md-6">
+                        <button class="btn btn-outline-primary btn-sm w-100" onclick="fillSample('positive')">
+                            Positive Example
+                        </button>
+                    </div>
+                    <div class="col-md-6">
+                        <button class="btn btn-outline-danger btn-sm w-100" onclick="fillSample('negative')">
+                            Negative Example
+                        </button>
+                    </div>
+                    <div class="col-md-6">
+                        <button class="btn btn-outline-info btn-sm w-100" onclick="fillSample('social')">
+                            Social Media Post
+                        </button>
+                    </div>
+                    <div class="col-md-6">
+                        <button class="btn btn-outline-warning btn-sm w-100" onclick="fillSample('review')">
+                            Customer Review
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+function fillSample(type) {
+    const textarea = document.getElementById('text_content');
+    const analysisType = document.getElementById('analysis_type');
+    
+    const samples = {
+        'positive': {
+            text: "I absolutely love this new product! It exceeded all my expectations and the customer service was fantastic. The team was so helpful and responsive. I'm definitely recommending this to all my friends and family. This has made my life so much easier and I couldn't be happier with my purchase!",
+            type: 'detailed'
+        },
+        'negative': {
+            text: "I'm extremely disappointed with this service. The product arrived late, damaged, and nothing like what was advertised. Customer support was unhelpful and rude when I tried to resolve the issue. I feel like I wasted my money and time. I would not recommend this to anyone and I'm considering asking for a full refund.",
+            type: 'customer'
+        },
+        'social': {
+            text: "Just had the BEST coffee ever at @CafeAwesome! ☕️✨ The barista was super friendly and the atmosphere is perfect for working. Definitely my new favorite spot! #coffee #productivity #goodvibes Can't wait to come back tomorrow! 😍",
+            type: 'social'
+        },
+        'review': {
+            text: "The product quality is decent but the delivery was slower than expected. The packaging could be improved as some items were slightly damaged. Customer service responded quickly to my concerns and offered a partial refund. Overall, it's an okay experience but there's room for improvement in logistics and packaging.",
+            type: 'customer'
+        }
+    };
+    
+    if (samples[type]) {
+        textarea.value = samples[type].text;
+        analysisType.value = samples[type].type;
+    }
+}
+</script>
+{% endblock %}

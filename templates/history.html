@@ -1,0 +1,378 @@
+{% extends "base.html" %}
+
+{% block title %}Analysis History - Sentiment Analysis{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-12">
+        <div class="d-flex justify-content-between align-items-center mb-4">
+            <h2>
+                <i class="fas fa-history me-2"></i>
+                Analysis History
+            </h2>
+            <div class="btn-group">
+                <button class="btn btn-outline-primary" onclick="exportHistory()">
+                    <i class="fas fa-download me-2"></i>Export History
+                </button>
+                <button class="btn btn-outline-danger" onclick="clearHistory()">
+                    <i class="fas fa-trash me-2"></i>Clear History
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Filters -->
+<div class="card mb-4">
+    <div class="card-body">
+        <div class="row align-items-center">
+            <div class="col-md-3">
+                <select class="form-select" id="filterSentiment" onchange="applyFilters()">
+                    <option value="all">All Sentiments</option>
+                    <option value="positive">Positive</option>
+                    <option value="negative">Negative</option>
+                    <option value="neutral">Neutral</option>
+                </select>
+            </div>
+            <div class="col-md-3">
+                <select class="form-select" id="filterType" onchange="applyFilters()">
+                    <option value="all">All Analysis Types</option>
+                    <option value="basic">Basic</option>
+                    <option value="detailed">Detailed</option>
+                    <option value="psychological">Psychological</option>
+                    <option value="social">Social Media</option>
+                    <option value="customer">Customer Feedback</option>
+                </select>
+            </div>
+            <div class="col-md-3">
+                <select class="form-select" id="sortBy" onchange="applyFilters()">
+                    <option value="newest">Newest First</option>
+                    <option value="oldest">Oldest First</option>
+                    <option value="confidence">Highest Confidence</option>
+                </select>
+            </div>
+            <div class="col-md-3">
+                <div class="input-group">
+                    <input type="text" class="form-control" id="searchText" placeholder="Search text...">
+                    <button class="btn btn-outline-primary" type="button" onclick="applyFilters()">
+                        <i class="fas fa-search"></i>
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+{% if analyses.items %}
+<!-- Analysis List -->
+<div id="analysisContainer">
+    {% for analysis in analyses.items %}
+    <div class="card mb-3 analysis-item" 
+         data-sentiment="{{ analysis.sentiment }}" 
+         data-type="{{ analysis.analysis_type }}"
+         data-date="{{ analysis.created_at.isoformat() }}"
+         data-confidence="{{ analysis.confidence_score }}">
+        <div class="card-body">
+            <div class="row">
+                <div class="col-md-8">
+                    <h5 class="card-title mb-2">Analysis #{{ analysis.id }}</h5>
+                    <p class="card-text text-muted mb-2">
+                        {{ analysis.text_content[:150] }}{% if analysis.text_content|length > 150 %}...{% endif %}
+                    </p>
+                    <div class="d-flex align-items-center">
+                        <span class="badge bg-{{ 'success' if analysis.sentiment == 'positive' else 'danger' if analysis.sentiment == 'negative' else 'secondary' }} me-2">
+                            {{ analysis.sentiment|title }}
+                        </span>
+                        <span class="badge bg-info me-2">{{ analysis.analysis_type|title }}</span>
+                        <small class="text-muted">{{ (analysis.confidence_score * 100)|round }}% confidence</small>
+                    </div>
+                </div>
+                <div class="col-md-4 text-end">
+                    <div class="mb-2">
+                        <small class="text-muted">
+                            {{ analysis.created_at.strftime('%b %d, %Y') }}<br>
+                            {{ analysis.created_at.strftime('%I:%M %p') }}
+                        </small>
+                    </div>
+                    <div class="btn-group" role="group">
+                        <a href="{{ url_for('view_analysis', analysis_id=analysis.id) }}" class="btn btn-outline-primary btn-sm">
+                            <i class="fas fa-eye me-1"></i>View
+                        </a>
+                        <button class="btn btn-outline-success btn-sm" onclick="copyAnalysis({{ analysis.id }})">
+                            <i class="fas fa-copy me-1"></i>Copy
+                        </button>
+                        <button class="btn btn-outline-danger btn-sm" onclick="deleteAnalysis({{ analysis.id }})">
+                            <i class="fas fa-trash me-1"></i>Delete
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    {% endfor %}
+</div>
+
+<!-- Pagination -->
+<nav aria-label="Analysis history pagination">
+    <ul class="pagination justify-content-center">
+        {% if analyses.has_prev %}
+        <li class="page-item">
+            <a class="page-link" href="{{ url_for('analysis_history', page=analyses.prev_num) }}">
+                <i class="fas fa-chevron-left"></i> Previous
+            </a>
+        </li>
+        {% else %}
+        <li class="page-item disabled">
+            <span class="page-link"><i class="fas fa-chevron-left"></i> Previous</span>
+        </li>
+        {% endif %}
+        
+        {% for page_num in analyses.iter_pages(left_edge=1, right_edge=1, left_current=2, right_current=2) %}
+            {% if page_num %}
+                {% if page_num == analyses.page %}
+                <li class="page-item active">
+                    <span class="page-link">{{ page_num }}</span>
+                </li>
+                {% else %}
+                <li class="page-item">
+                    <a class="page-link" href="{{ url_for('analysis_history', page=page_num) }}">{{ page_num }}</a>
+                </li>
+                {% endif %}
+            {% else %}
+                <li class="page-item disabled">
+                    <span class="page-link">...</span>
+                </li>
+            {% endif %}
+        {% endfor %}
+        
+        {% if analyses.has_next %}
+        <li class="page-item">
+            <a class="page-link" href="{{ url_for('analysis_history', page=analyses.next_num) }}">
+                Next <i class="fas fa-chevron-right"></i>
+            </a>
+        </li>
+        {% else %}
+        <li class="page-item disabled">
+            <span class="page-link">Next <i class="fas fa-chevron-right"></i></span>
+        </li>
+        {% endif %}
+    </ul>
+</nav>
+
+<!-- Statistics -->
+<div class="row mt-4">
+    <div class="col-md-3">
+        <div class="card text-center">
+            <div class="card-body">
+                <h4 class="text-primary">{{ analyses.total }}</h4>
+                <p class="mb-0">Total Analyses</p>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="card text-center">
+            <div class="card-body">
+                <h4 class="text-success">{{ analyses.items|selectattr('sentiment', 'equalto', 'positive')|list|length }}</h4>
+                <p class="mb-0">Positive</p>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="card text-center">
+            <div class="card-body">
+                <h4 class="text-danger">{{ analyses.items|selectattr('sentiment', 'equalto', 'negative')|list|length }}</h4>
+                <p class="mb-0">Negative</p>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="card text-center">
+            <div class="card-body">
+                <h4 class="text-secondary">{{ analyses.items|selectattr('sentiment', 'equalto', 'neutral')|list|length }}</h4>
+                <p class="mb-0">Neutral</p>
+            </div>
+        </div>
+    </div>
+</div>
+
+{% else %}
+<!-- Empty State -->
+<div class="text-center py-5">
+    <i class="fas fa-history fa-4x text-muted mb-4"></i>
+    <h3>No analysis history yet</h3>
+    <p class="text-muted mb-4">Start by analyzing your first text!</p>
+    <div class="btn-group" role="group">
+        <a href="{{ url_for('analyze_text') }}" class="btn btn-primary">
+            <i class="fas fa-brain me-2"></i>Analyze Text
+        </a>
+        <a href="{{ url_for('batch_analyze') }}" class="btn btn-success">
+            <i class="fas fa-layer-group me-2"></i>Batch Analysis
+        </a>
+    </div>
+</div>
+{% endif %}
+{% endblock %}
+
+{% block scripts %}
+<script>
+function applyFilters() {
+    const sentimentFilter = document.getElementById('filterSentiment').value;
+    const typeFilter = document.getElementById('filterType').value;
+    const sortBy = document.getElementById('sortBy').value;
+    const searchText = document.getElementById('searchText').value.toLowerCase();
+    
+    const analyses = document.querySelectorAll('.analysis-item');
+    
+    analyses.forEach(analysis => {
+        const sentiment = analysis.getAttribute('data-sentiment');
+        const type = analysis.getAttribute('data-type');
+        const date = new Date(analysis.getAttribute('data-date'));
+        const confidence = parseFloat(analysis.getAttribute('data-confidence'));
+        const text = analysis.querySelector('.card-text').textContent.toLowerCase();
+        
+        let showSentiment = sentimentFilter === 'all' || sentiment === sentimentFilter;
+        let showType = typeFilter === 'all' || type === typeFilter;
+        let showSearch = !searchText || text.includes(searchText);
+        
+        if (showSentiment && showType && showSearch) {
+            analysis.style.display = 'block';
+        } else {
+            analysis.style.display = 'none';
+        }
+    });
+    
+    // Sort analyses
+    const container = document.getElementById('analysisContainer');
+    const analysisArray = Array.from(analyses);
+    
+    analysisArray.sort((a, b) => {
+        switch (sortBy) {
+            case 'newest':
+                return new Date(b.getAttribute('data-date')) - new Date(a.getAttribute('data-date'));
+            case 'oldest':
+                return new Date(a.getAttribute('data-date')) - new Date(b.getAttribute('data-date'));
+            case 'confidence':
+                return parseFloat(b.getAttribute('data-confidence')) - parseFloat(a.getAttribute('data-confidence'));
+            default:
+                return 0;
+        }
+    });
+    
+    // Re-append sorted elements
+    analysisArray.forEach(analysis => container.appendChild(analysis));
+}
+
+function copyAnalysis(analysisId) {
+    // In a real app, this would copy the analysis content
+    const btn = event.target.closest('button');
+    const originalText = btn.innerHTML;
+    btn.innerHTML = '<i class="fas fa-check me-1"></i>Copied!';
+    btn.classList.remove('btn-outline-success');
+    btn.classList.add('btn-success');
+    
+    setTimeout(() => {
+        btn.innerHTML = originalText;
+        btn.classList.remove('btn-success');
+        btn.classList.add('btn-outline-success');
+    }, 2000);
+}
+
+function deleteAnalysis(analysisId) {
+    if (confirm('Are you sure you want to delete this analysis? This action cannot be undone.')) {
+        // In a real app, this would send an AJAX request to delete the analysis
+        const analysisElement = event.target.closest('.analysis-item');
+        analysisElement.style.display = 'none';
+        
+        // Show success message
+        const alert = document.createElement('div');
+        alert.className = 'alert alert-success alert-dismissible fade show';
+        alert.innerHTML = `
+            Analysis deleted successfully!
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        `;
+        document.querySelector('.container').insertBefore(alert, document.querySelector('.row'));
+        
+        // Auto-dismiss after 3 seconds
+        setTimeout(() => {
+            if (alert.parentNode) {
+                alert.remove();
+            }
+        }, 3000);
+    }
+}
+
+function exportHistory() {
+    // In a real app, this would export all analyses to a file
+    const alert = document.createElement('div');
+    alert.className = 'alert alert-info alert-dismissible fade show';
+    alert.innerHTML = `
+        <i class="fas fa-spinner fa-spin me-2"></i>
+        Exporting analysis history...
+        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+    `;
+    document.querySelector('.container').insertBefore(alert, document.querySelector('.row'));
+    
+    // Simulate export process
+    setTimeout(() => {
+        if (alert.parentNode) {
+            alert.innerHTML = `
+                <i class="fas fa-check me-2"></i>
+                Analysis history exported successfully!
+                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+            `;
+            alert.className = 'alert alert-success alert-dismissible fade show';
+        }
+        
+        // Create and trigger download
+        const link = document.createElement('a');
+        link.href = 'data:text/json;charset=utf-8,' + encodeURIComponent(JSON.stringify({
+            exported_at: new Date().toISOString(),
+            analyses: 'Sample analysis history data'
+        }));
+        link.download = 'sentiment_analysis_history.json';
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+        
+        // Auto-dismiss after 3 seconds
+        setTimeout(() => {
+            if (alert.parentNode) {
+                alert.remove();
+            }
+        }, 3000);
+    }, 1500);
+}
+
+function clearHistory() {
+    if (confirm('Are you sure you want to clear your entire analysis history? This action cannot be undone.')) {
+        // In a real app, this would send an AJAX request to clear history
+        const analyses = document.querySelectorAll('.analysis-item');
+        analyses.forEach(analysis => {
+            analysis.style.display = 'none';
+        });
+        
+        // Show success message
+        const alert = document.createElement('div');
+        alert.className = 'alert alert-success alert-dismissible fade show';
+        alert.innerHTML = `
+            Analysis history cleared successfully!
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        `;
+        document.querySelector('.container').insertBefore(alert, document.querySelector('.row'));
+        
+        // Update statistics
+        const statCards = document.querySelectorAll('.card h4');
+        statCards.forEach(card => {
+            card.textContent = '0';
+        });
+        
+        // Auto-dismiss after 3 seconds
+        setTimeout(() => {
+            if (alert.parentNode) {
+                alert.remove();
+            }
+        }, 3000);
+    }
+}
+</script>
+{% endblock %}
